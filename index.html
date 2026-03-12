@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mind Map</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <span class="toolbar-title">Mind Map</span>
+
+      <button class="toolbar-btn" id="btn-undo" disabled title="Undo (Ctrl+Z)">
+        <span class="btn-icon">↩</span>
+        <span class="btn-label">Undo</span>
+      </button>
+
+      <button class="toolbar-btn" id="btn-redo" disabled title="Redo (Ctrl+Y)">
+        <span class="btn-icon">↪</span>
+        <span class="btn-label">Redo</span>
+      </button>
+
+      <div class="toolbar-separator"></div>
+
+      <button class="toolbar-btn primary" id="btn-add" disabled title="Add child node (Tab)">
+        <span class="btn-icon">+</span>
+        <span class="btn-label">Add</span>
+      </button>
+
+      <button class="toolbar-btn" id="btn-edit" disabled title="Edit node (Enter)">
+        <span class="btn-icon">✏️</span>
+        <span class="btn-label">Edit</span>
+      </button>
+
+      <button class="toolbar-btn danger" id="btn-delete" disabled title="Delete node (Delete)">
+        <span class="btn-icon">🗑️</span>
+        <span class="btn-label">Delete</span>
+      </button>
+
+      <div class="toolbar-separator"></div>
+
+      <button class="toolbar-btn" id="btn-mic-toolbar" title="Voice add (hold to speak)">
+        <span class="btn-icon">🎤</span>
+        <span class="btn-label">Voice</span>
+      </button>
+
+      <button class="toolbar-btn" id="btn-fit" title="Fit to screen">
+        <span class="btn-icon">⊞</span>
+        <span class="btn-label">Fit</span>
+      </button>
+
+      <button class="toolbar-btn" id="btn-pdf" title="Export as PDF">
+        <span class="btn-icon">📄</span>
+        <span class="btn-label">PDF</span>
+      </button>
+
+      <div class="toolbar-spacer"></div>
+
+      <!-- Auth Section -->
+      <div class="auth-section">
+        <span class="user-name" id="user-name"></span>
+        <button class="toolbar-btn" id="btn-auth">
+          <span class="btn-icon">👤</span>
+          <span class="btn-label" id="auth-label">Sign In</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SVG Canvas -->
+    <div class="canvas-container" id="canvas-container">
+      <svg id="mindmap-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span id="status-left">Click a node to select it</span>
+      <span id="status-right"></span>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <div class="modal-title">Edit Node</div>
+      <div class="modal-input-group">
+        <textarea class="modal-input" id="edit-input" placeholder="Enter node text… (supports URLs and image URLs)" rows="4" autocomplete="off"></textarea>
+        <button class="mic-btn" id="btn-mic-modal" title="Dictate">🎤</button>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="btn-modal-cancel">Cancel</button>
+        <button class="modal-btn save" id="btn-modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="confirm-overlay" id="confirm-dialog">
+    <div class="confirm-dialog">
+      <div class="confirm-message" id="confirm-message">Are you sure?</div>
+      <div class="confirm-actions">
+        <button class="modal-btn cancel" id="btn-confirm-cancel">Cancel</button>
+        <button class="modal-btn save" id="btn-confirm-ok" style="background:#E74C3C;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

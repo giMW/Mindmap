@@ -1,0 +1,495 @@
+/* ============================================
+   Mind Map Web App — Styles
+   ============================================ */
+
+/* Reset & Base */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #F0F2F5;
+  color: #2C3E50;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---- Toolbar ---- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #DEE2E6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2C3E50;
+  margin-right: auto;
+}
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #DEE2E6;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #495057;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.toolbar-btn:hover {
+  background: #F8F9FA;
+  border-color: #ADB5BD;
+}
+
+.toolbar-btn:active {
+  background: #E9ECEF;
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-btn.primary {
+  background: #4A90D9;
+  color: #FFFFFF;
+  border-color: #4A90D9;
+}
+
+.toolbar-btn.primary:hover {
+  background: #3A7BC8;
+}
+
+.toolbar-btn.danger {
+  color: #E74C3C;
+  border-color: #E74C3C;
+}
+
+.toolbar-btn.danger:hover {
+  background: #FFF5F5;
+}
+
+.toolbar-btn .btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.toolbar-btn .btn-label {
+  font-size: 13px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 28px;
+  background: #DEE2E6;
+  margin: 0 4px;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+/* Auth section */
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #DEE2E6;
+}
+
+.user-name {
+  font-size: 13px;
+  color: #6C757D;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- SVG Canvas ---- */
+.canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #F0F2F5;
+}
+
+#mindmap-svg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#mindmap-svg:active {
+  cursor: grabbing;
+}
+
+/* SVG Node Styles */
+.node-circle,
+.node-rect {
+  cursor: pointer;
+  transition: stroke-width 0.15s;
+}
+
+.node-circle:hover,
+.node-rect:hover {
+  filter: brightness(1.08);
+}
+
+.node-group.dragging {
+  cursor: grabbing;
+}
+
+.node-group.dragging .node-rect,
+.node-group.dragging .node-circle {
+  filter: brightness(1.12) drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.node-label {
+  user-select: none;
+  pointer-events: none;
+}
+
+.node-checkbox {
+  cursor: pointer;
+}
+
+.node-checkbox:hover {
+  filter: brightness(0.9);
+}
+
+.edge {
+  transition: opacity 0.2s;
+}
+
+/* ---- Edit Modal ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #2C3E50;
+}
+
+.modal-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.modal-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #DEE2E6;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 80px;
+}
+
+.modal-input:focus {
+  border-color: #4A90D9;
+}
+
+.mic-btn {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #DEE2E6;
+  border-radius: 10px;
+  background: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.mic-btn:hover {
+  background: #F8F9FA;
+  border-color: #ADB5BD;
+}
+
+.mic-btn.recording {
+  background: #FDEDEE;
+  border-color: #E74C3C;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.mic-btn.hidden {
+  display: none;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal-btn.cancel {
+  background: #E9ECEF;
+  color: #495057;
+}
+
+.modal-btn.cancel:hover {
+  background: #DEE2E6;
+}
+
+.modal-btn.save {
+  background: #4A90D9;
+  color: #FFFFFF;
+}
+
+.modal-btn.save:hover {
+  background: #3A7BC8;
+}
+
+/* ---- Loading Spinner ---- */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 300;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-overlay.active {
+  display: flex;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #DEE2E6;
+  border-top-color: #4A90D9;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Status Bar ---- */
+.status-bar {
+  padding: 4px 16px;
+  background: #FFFFFF;
+  border-top: 1px solid #DEE2E6;
+  font-size: 12px;
+  color: #6C757D;
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+/* ---- Confirm Dialog ---- */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 250;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirm-overlay.active {
+  display: flex;
+}
+
+.confirm-dialog {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 340px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.confirm-message {
+  font-size: 15px;
+  margin-bottom: 20px;
+  color: #2C3E50;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* ---- Responsive: Mobile ---- */
+@media (max-width: 767px) {
+  .toolbar {
+    padding: 6px 10px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-title {
+    font-size: 15px;
+  }
+
+  .toolbar-btn {
+    padding: 8px 10px;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .toolbar-btn .btn-label {
+    display: none;
+  }
+
+  .toolbar-separator {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  /* Bottom-sheet style modal on mobile */
+  .modal-overlay {
+    align-items: flex-end;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    animation: slideUp 0.25s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .status-bar {
+    padding: 4px 10px;
+  }
+}
+
+/* ---- Accessibility ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Keyboard Focus ---- */
+.toolbar-btn:focus-visible,
+.modal-btn:focus-visible,
+.mic-btn:focus-visible {
+  outline: 2px solid #4A90D9;
+  outline-offset: 2px;
+}
+
+/* ---- Print / PDF ---- */
+@media print {
+  .toolbar, .status-bar, .modal-overlay, .confirm-overlay, .loading-overlay {
+    display: none !important;
+  }
+  html, body {
+    overflow: visible;
+    background: white;
+    width: 100%;
+    height: 100%;
+  }
+  #app {
+    height: auto;
+  }
+  .canvas-container {
+    position: static;
+    width: 100%;
+    height: 100vh;
+  }
+  #mindmap-svg {
+    width: 100%;
+    height: 100%;
+  }
+}
