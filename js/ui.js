@@ -473,7 +473,7 @@ function onDragTouchStart(e) {
   _dragOffset = { x: pt.x - pos.x, y: pt.y - pos.y };
   _didDrag = false;
   _isPanning = false;
-  e.preventDefault();
+  // Don't preventDefault here — it blocks the tap/click event on mobile
 }
 
 function onDragMove(e) {
@@ -535,8 +535,11 @@ function onDragEnd() {
     // Full re-render to clean up the transform hack and redraw properly
     render();
   } else {
-    // Was just a click, not a drag — let click events fire normally
+    // Was just a tap, not a drag — select the node directly
+    // (touch events don't always produce a reliable click event on mobile)
+    const tappedId = _dragNodeId;
     _dragNodeId = null;
+    selectNode(tappedId);
   }
 }
 
