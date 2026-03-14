@@ -15,12 +15,12 @@
 
 // TODO: Replace with your Firebase project config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyDz9vSXUKBuIOmMPGJPfYSbM-D3kagh9LE",
+  authDomain: "mymindmap-b2dff.firebaseapp.com",
+  projectId: "mymindmap-b2dff",
+  storageBucket: "mymindmap-b2dff.firebasestorage.app",
+  messagingSenderId: "912888131114",
+  appId: "1:912888131114:web:e2b987b9e5c54004a95d53",
 };
 
 // Check if Firebase is configured
