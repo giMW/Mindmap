@@ -403,8 +403,12 @@ function setupPanZoom() {
     _lastTouches = null;
   });
 
-  // Resize
-  window.addEventListener('resize', () => render());
+  // Resize (debounced to avoid excessive re-renders)
+  let _resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (_resizeTimer) clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => render(), 150);
+  });
 }
 
 function getTouchData(touches) {

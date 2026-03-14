@@ -1,22 +1,21 @@
-// Undo/redo history for tree snapshots
+// Undo/redo history using lightweight JSON snapshots
 
-import { cloneTree } from './mindmap.js';
+import { serializeTree, deserializeTree } from './mindmap.js';
 
-const MAX_HISTORY = 50;
+const MAX_HISTORY = 20;
 
-let _undoStack = [];  // past snapshots
-let _redoStack = [];  // future snapshots (after undo)
+let _undoStack = [];  // past snapshots (JSON strings)
+let _redoStack = [];  // future snapshots (JSON strings)
 
 /**
  * Save a snapshot of the current tree state.
  * Call this BEFORE each mutation.
  */
 export function pushSnapshot(root) {
-  _undoStack.push(cloneTree(root));
+  _undoStack.push(JSON.stringify(serializeTree(root)));
   if (_undoStack.length > MAX_HISTORY) {
     _undoStack.shift();
   }
-  // Any new action clears the redo stack
   _redoStack = [];
 }
 
@@ -26,8 +25,8 @@ export function pushSnapshot(root) {
  */
 export function undo(currentRoot) {
   if (_undoStack.length === 0) return null;
-  _redoStack.push(cloneTree(currentRoot));
-  return _undoStack.pop();
+  _redoStack.push(JSON.stringify(serializeTree(currentRoot)));
+  return deserializeTree(JSON.parse(_undoStack.pop()));
 }
 
 /**
@@ -36,8 +35,8 @@ export function undo(currentRoot) {
  */
 export function redo(currentRoot) {
   if (_redoStack.length === 0) return null;
-  _undoStack.push(cloneTree(currentRoot));
-  return _redoStack.pop();
+  _undoStack.push(JSON.stringify(serializeTree(currentRoot)));
+  return deserializeTree(JSON.parse(_redoStack.pop()));
 }
 
 export function canUndo() {
