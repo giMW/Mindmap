@@ -641,9 +641,17 @@ function onDragEnd() {
       if (currentParent && currentParent.parent && currentParent.parent.id !== targetId) {
         pushSnapshot(_root);
         if (moveNode(_root, draggedId, targetId)) {
-          // Clear position override so it takes its new layout position
           clearPositionOverrides();
           treeChanged();
+        }
+      }
+    } else {
+      // No drop target — just reposition the node
+      const positions = getCurrentPositions();
+      if (positions) {
+        const pos = positions.get(draggedId);
+        if (pos) {
+          setPositionOverride(draggedId, pos.x, pos.y);
         }
       }
     }
