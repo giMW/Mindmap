@@ -349,24 +349,36 @@ function drawNode(layer, pos, isSelected, callbacks) {
     }
 
     // Checkbox (top-right corner of rectangle)
-    const cbSize = 14;
+    const cbSize = 18;
     const cbX = rx + nodeW - 4;
     const cbY = ry - 4;
+
+    // Invisible larger tap target for mobile
+    const cbHit = document.createElementNS(SVG_NS, 'rect');
+    const hitSize = 36;
+    cbHit.setAttribute('x', cbX - hitSize / 2);
+    cbHit.setAttribute('y', cbY - hitSize / 2);
+    cbHit.setAttribute('width', hitSize);
+    cbHit.setAttribute('height', hitSize);
+    cbHit.setAttribute('fill', 'transparent');
+    cbHit.classList.add('node-checkbox');
+    cbHit.style.cursor = 'pointer';
+    group.appendChild(cbHit);
 
     const cbRect = document.createElementNS(SVG_NS, 'rect');
     cbRect.setAttribute('x', cbX - cbSize / 2);
     cbRect.setAttribute('y', cbY - cbSize / 2);
     cbRect.setAttribute('width', cbSize);
     cbRect.setAttribute('height', cbSize);
-    cbRect.setAttribute('rx', '2');
+    cbRect.setAttribute('rx', '3');
     cbRect.setAttribute('fill', node.done ? colors.stroke : '#FFFFFF');
     cbRect.setAttribute('stroke', colors.stroke);
     cbRect.setAttribute('stroke-width', '1.5');
     cbRect.classList.add('node-checkbox');
-    cbRect.style.cursor = 'pointer';
+    cbRect.setAttribute('pointer-events', 'none');
 
     if (callbacks.onCheckboxClick) {
-      cbRect.addEventListener('click', (e) => {
+      cbHit.addEventListener('click', (e) => {
         e.stopPropagation();
         callbacks.onCheckboxClick(node.id);
       });

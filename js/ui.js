@@ -482,6 +482,7 @@ function getTouchData(touches) {
 let _dragNodeId = null;
 let _dragOffset = { x: 0, y: 0 };
 let _didDrag = false;
+let _dragTouchTarget = null; // original element touched (for checkbox detection)
 
 function setupNodeDrag() {
   svg.addEventListener('mousedown', onDragStart);
@@ -516,6 +517,13 @@ function onDragTouchStart(e) {
   const touch = e.touches[0];
   const el = document.elementFromPoint(touch.clientX, touch.clientY);
   if (!el) return;
+
+  // If tapping a checkbox, let it through directly — don't start drag
+  if (el.classList.contains('node-checkbox')) {
+    _dragTouchTarget = el;
+    return;
+  }
+
   const group = el.closest('.node-group');
   if (!group) return;
   const nodeId = group.dataset.nodeId;
@@ -531,7 +539,7 @@ function onDragTouchStart(e) {
   _dragOffset = { x: pt.x - pos.x, y: pt.y - pos.y };
   _didDrag = false;
   _isPanning = false;
-  // Don't preventDefault here — it blocks the tap/click event on mobile
+  _dragTouchTarget = null;
 }
 
 function onDragMove(e) {
@@ -611,6 +619,14 @@ function moveDraggedNode(newX, newY) {
 }
 
 function onDragEnd() {
+  // Handle checkbox tap on touch devices
+  if (_dragTouchTarget && _dragTouchTarget.classList.contains('node-checkbox')) {
+    _dragTouchTarget.click();
+    _dragTouchTarget = null;
+    return;
+  }
+  _dragTouchTarget = null;
+
   if (!_dragNodeId) return;
 
   // Clear drop target highlight
