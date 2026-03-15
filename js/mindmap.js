@@ -92,12 +92,22 @@ export function updateNodeText(root, nodeId, newText) {
 
 /**
  * Toggle the done state of a node.
+ * When marking done, all descendants are also marked done.
+ * When unmarking, all descendants are also unmarked.
  */
 export function toggleDone(root, nodeId) {
   const result = findNode(root, nodeId);
   if (!result) return false;
-  result.node.done = !result.node.done;
+  const newState = !result.node.done;
+  setDoneRecursive(result.node, newState);
   return true;
+}
+
+function setDoneRecursive(node, done) {
+  node.done = done;
+  for (const child of node.children) {
+    setDoneRecursive(child, done);
+  }
 }
 
 /**
