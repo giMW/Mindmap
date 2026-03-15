@@ -2,7 +2,7 @@
 
 import { renderMindMap, getCurrentPositions, redrawEdges, setPositionOverride, clearPositionOverrides } from './renderer.js';
 import {
-  addChild, updateNodeText, toggleDone, deleteNode,
+  addChild, updateNodeText, toggleDone, deleteNode, moveNode,
   findNode, getNodeDepth,
 } from './mindmap.js';
 import { createVoiceController, isSpeechSupported } from './voice.js';
@@ -36,6 +36,8 @@ const editInput = document.getElementById('edit-input');
 const btnModalCancel = document.getElementById('btn-modal-cancel');
 const btnModalSave = document.getElementById('btn-modal-save');
 const btnMicModal = document.getElementById('btn-mic-modal');
+const emojiTabs = document.getElementById('emoji-tabs');
+const emojiGrid = document.getElementById('emoji-grid');
 
 // Confirm dialog
 const confirmOverlay = document.getElementById('confirm-dialog');
@@ -210,6 +212,13 @@ function setupToolbarButtons() {
 
 let _editingNodeId = null;
 
+const EMOJI_CATEGORIES = {
+  'Smileys':  ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😘','😋','😛','🤔','🤗','🤫','😎','🥳','😤','💪','👍','👏','🙌','🤝','❤️','🔥'],
+  'Nature':   ['🌟','⭐','🌈','☀️','🌙','⚡','💧','🌊','🌸','🌺','🌻','🌹','🍀','🌿','🌴','🌳','🍎','🍊','🍋','🍇','🍉','🍓','🥑','🌽','🐶','🐱','🦋','🐝','🐢','🦄'],
+  'Objects':  ['💡','🎯','🏆','🎨','🎵','🎬','📷','💻','📱','📧','📝','📌','📎','🔑','🔒','🔔','💰','💎','🎁','🎈','🎉','🎊','🏠','🚀','✈️','🚗','⏰','📅','🗂️','📊'],
+  'Symbols':  ['✅','❌','⚠️','💯','✨','💥','💫','🔴','🟠','🟡','🟢','🔵','🟣','⬛','⬜','🔶','🔷','▶️','⏸️','🔄','➕','➖','❓','❗','♻️','🏷️','🔗','📍','🚩','🎗️'],
+};
+
 function setupModal() {
   btnModalCancel.addEventListener('click', closeEditModal);
   btnModalSave.addEventListener('click', saveEditModal);
@@ -228,6 +237,51 @@ function setupModal() {
       closeEditModal();
     }
   });
+
+  setupEmojiPicker();
+}
+
+function setupEmojiPicker() {
+  const categories = Object.keys(EMOJI_CATEGORIES);
+
+  // Build tabs
+  categories.forEach((cat, i) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'emoji-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = cat;
+    tab.addEventListener('click', () => {
+      emojiTabs.querySelectorAll('.emoji-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderEmojiGrid(cat);
+    });
+    emojiTabs.appendChild(tab);
+  });
+
+  // Show first category
+  renderEmojiGrid(categories[0]);
+}
+
+function renderEmojiGrid(category) {
+  emojiGrid.innerHTML = '';
+  for (const emoji of EMOJI_CATEGORIES[category]) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'emoji-btn';
+    btn.textContent = emoji;
+    btn.addEventListener('click', () => {
+      // Insert emoji at cursor position in the textarea
+      const start = editInput.selectionStart;
+      const end = editInput.selectionEnd;
+      const val = editInput.value;
+      editInput.value = val.slice(0, start) + emoji + val.slice(end);
+      // Move cursor after the inserted emoji
+      const newPos = start + emoji.length;
+      editInput.setSelectionRange(newPos, newPos);
+      editInput.focus();
+    });
+    emojiGrid.appendChild(btn);
+  }
 }
 
 function openEditModal(nodeId) {
@@ -494,6 +548,8 @@ function onDragTouchMove(e) {
   moveDraggedNode(pt.x - _dragOffset.x, pt.y - _dragOffset.y);
 }
 
+let _dropTargetId = null;
+
 function moveDraggedNode(newX, newY) {
   const positions = getCurrentPositions();
   if (!positions) return;
@@ -520,29 +576,75 @@ function moveDraggedNode(newX, newY) {
     group.setAttribute('transform', `translate(${newX - origX}, ${newY - origY})`);
   }
 
+  // Find closest node as drop target (for reparenting)
+  let closestId = null;
+  let closestDist = 60; // max snap distance in SVG units
+  positions.forEach((p, id) => {
+    if (id === _dragNodeId) return;
+    // Don't allow dropping onto a descendant
+    const dragNode = findNode(_root, _dragNodeId);
+    if (dragNode && findNode(dragNode.node, id)) return;
+    const d = Math.sqrt((newX - p.x) ** 2 + (newY - p.y) ** 2);
+    if (d < closestDist) {
+      closestDist = d;
+      closestId = id;
+    }
+  });
+
+  // Update drop target highlight
+  if (closestId !== _dropTargetId) {
+    // Remove old highlight
+    if (_dropTargetId) {
+      const oldGroup = svg.querySelector(`.node-group[data-node-id="${_dropTargetId}"]`);
+      if (oldGroup) oldGroup.classList.remove('drop-target');
+    }
+    // Add new highlight
+    if (closestId) {
+      const newGroup = svg.querySelector(`.node-group[data-node-id="${closestId}"]`);
+      if (newGroup) newGroup.classList.add('drop-target');
+    }
+    _dropTargetId = closestId;
+  }
+
   // Redraw edges only (cheap)
   redrawEdges(svg, _root, positions);
 }
 
 function onDragEnd() {
   if (!_dragNodeId) return;
+
+  // Clear drop target highlight
+  if (_dropTargetId) {
+    const g = svg.querySelector(`.node-group[data-node-id="${_dropTargetId}"]`);
+    if (g) g.classList.remove('drop-target');
+  }
+
   if (_didDrag) {
-    const positions = getCurrentPositions();
-    if (positions) {
-      const pos = positions.get(_dragNodeId);
-      if (pos) {
-        setPositionOverride(_dragNodeId, pos.x, pos.y);
-      }
-    }
+    const draggedId = _dragNodeId;
+    const targetId = _dropTargetId;
     _dragNodeId = null;
     _didDrag = false;
-    // Full re-render to clean up the transform hack and redraw properly
+    _dropTargetId = null;
+
+    if (targetId) {
+      // Reparent: move dragged node under the drop target
+      const currentParent = findNode(_root, draggedId);
+      if (currentParent && currentParent.parent && currentParent.parent.id !== targetId) {
+        pushSnapshot(_root);
+        if (moveNode(_root, draggedId, targetId)) {
+          // Clear position override so it takes its new layout position
+          clearPositionOverrides();
+          treeChanged();
+        }
+      }
+    }
+    // Full re-render
     render();
   } else {
     // Was just a tap, not a drag — select the node directly
-    // (touch events don't always produce a reliable click event on mobile)
     const tappedId = _dragNodeId;
     _dragNodeId = null;
+    _dropTargetId = null;
     selectNode(tappedId);
   }
 }

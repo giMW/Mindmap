@@ -101,6 +101,29 @@ export function toggleDone(root, nodeId) {
 }
 
 /**
+ * Move a node (and its subtree) to a new parent.
+ * Cannot move root, cannot move to itself or its own descendant.
+ */
+export function moveNode(root, nodeId, newParentId) {
+  if (nodeId === root.id || nodeId === newParentId) return false;
+
+  const nodeResult = findNode(root, nodeId);
+  if (!nodeResult || !nodeResult.parent) return false;
+
+  // Prevent moving a node into its own subtree
+  if (findNode(nodeResult.node, newParentId)) return false;
+
+  const parentResult = findNode(root, newParentId);
+  if (!parentResult) return false;
+
+  // Remove from old parent
+  nodeResult.parent.children.splice(nodeResult.index, 1);
+  // Add to new parent
+  parentResult.node.children.push(nodeResult.node);
+  return true;
+}
+
+/**
  * Delete a node and its subtree. Cannot delete root.
  */
 export function deleteNode(root, nodeId) {

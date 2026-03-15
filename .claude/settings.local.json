@@ -12,7 +12,11 @@
       "Bash(which gh:*)",
       "Bash(winget install:*)",
       "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh auth status 2>&1)",
-      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh auth login --web -p https 2>&1)"
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh auth login --web -p https 2>&1)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh api user --jq '.login,.email,.name' 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\getpl\\\\myproj\\\\Mindmap\" && export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh repo create Mindmap --public --source=. --push 2>&1)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh api repos/giMW/Mindmap/pages -X POST -f \"build_type=workflow\" -f \"source[branch]=master\" -f \"source[path]=/\" 2>&1)",
+      "Bash(sleep 10 && export PATH=\"$PATH:/c/Program Files/GitHub CLI\" && gh -R giMW/Mindmap run list --limit 1 2>&1)"
     ]
   }
 }
