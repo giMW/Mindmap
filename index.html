@@ -13,49 +13,19 @@
     <div class="toolbar">
       <span class="toolbar-title">Mind Map</span>
 
-      <button class="toolbar-btn" id="btn-undo" disabled title="Undo (Ctrl+Z)">
-        <span class="btn-icon">↩</span>
-        <span class="btn-label">Undo</span>
-      </button>
-
-      <button class="toolbar-btn" id="btn-redo" disabled title="Redo (Ctrl+Y)">
-        <span class="btn-icon">↪</span>
-        <span class="btn-label">Redo</span>
-      </button>
+      <button class="toolbar-btn" id="btn-undo" disabled title="Undo (Ctrl+Z)">Undo</button>
+      <button class="toolbar-btn" id="btn-redo" disabled title="Redo (Ctrl+Y)">Redo</button>
 
       <div class="toolbar-separator"></div>
 
-      <button class="toolbar-btn primary" id="btn-add" disabled title="Add child node (Tab)">
-        <span class="btn-icon">+</span>
-        <span class="btn-label">Add</span>
-      </button>
-
-      <button class="toolbar-btn" id="btn-edit" disabled title="Edit node (Enter)">
-        <span class="btn-icon">✏️</span>
-        <span class="btn-label">Edit</span>
-      </button>
-
-      <button class="toolbar-btn danger" id="btn-delete" disabled title="Delete node (Delete)">
-        <span class="btn-icon">🗑️</span>
-        <span class="btn-label">Delete</span>
-      </button>
+      <button class="toolbar-btn primary" id="btn-add" disabled title="Add child node (Tab)">Add</button>
+      <button class="toolbar-btn" id="btn-edit" disabled title="Edit node (Enter)">Edit</button>
+      <button class="toolbar-btn danger" id="btn-delete" disabled title="Delete node (Delete)">Delete</button>
 
       <div class="toolbar-separator"></div>
 
-      <button class="toolbar-btn" id="btn-mic-toolbar" title="Voice add (hold to speak)">
-        <span class="btn-icon">🎤</span>
-        <span class="btn-label">Voice</span>
-      </button>
-
-      <button class="toolbar-btn" id="btn-fit" title="Fit to screen">
-        <span class="btn-icon">⊞</span>
-        <span class="btn-label">Fit</span>
-      </button>
-
-      <button class="toolbar-btn" id="btn-pdf" title="Export as PDF">
-        <span class="btn-icon">📄</span>
-        <span class="btn-label">PDF</span>
-      </button>
+      <button class="toolbar-btn" id="btn-fit" title="Fit to screen">Fit</button>
+      <button class="toolbar-btn" id="btn-pdf" title="Export as PDF">PDF</button>
 
       <div class="toolbar-spacer"></div>
 
@@ -63,8 +33,7 @@
       <div class="auth-section">
         <span class="user-name" id="user-name"></span>
         <button class="toolbar-btn" id="btn-auth">
-          <span class="btn-icon">👤</span>
-          <span class="btn-label" id="auth-label">Sign In</span>
+          <span id="auth-label">Sign In</span>
         </button>
       </div>
     </div>
@@ -87,7 +56,7 @@
       <div class="modal-title">Edit Node</div>
       <div class="modal-input-group">
         <textarea class="modal-input" id="edit-input" placeholder="Enter node text… (supports URLs and image URLs)" rows="4" autocomplete="off"></textarea>
-        <button class="mic-btn" id="btn-mic-modal" title="Dictate">🎤</button>
+
       </div>
       <div class="emoji-picker" id="emoji-picker">
         <div class="emoji-tabs" id="emoji-tabs"></div>

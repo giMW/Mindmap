@@ -93,14 +93,6 @@ html, body {
   background: #FFF5F5;
 }
 
-.toolbar-btn .btn-icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.toolbar-btn .btn-label {
-  font-size: 13px;
-}
 
 .toolbar-separator {
   width: 1px;
@@ -260,40 +252,6 @@ html, body {
   border-color: #4A90D9;
 }
 
-.mic-btn {
-  width: 44px;
-  height: 44px;
-  border: 2px solid #DEE2E6;
-  border-radius: 10px;
-  background: #FFFFFF;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  transition: background 0.15s, border-color 0.15s;
-  flex-shrink: 0;
-}
-
-.mic-btn:hover {
-  background: #F8F9FA;
-  border-color: #ADB5BD;
-}
-
-.mic-btn.recording {
-  background: #FDEDEE;
-  border-color: #E74C3C;
-  animation: pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
-.mic-btn.hidden {
-  display: none;
-}
 
 /* Emoji Picker */
 .emoji-picker {
@@ -486,9 +444,6 @@ html, body {
     justify-content: center;
   }
 
-  .toolbar-btn .btn-label {
-    display: none;
-  }
 
   .toolbar-separator {
     display: none;
@@ -532,8 +487,7 @@ html, body {
 
 /* ---- Keyboard Focus ---- */
 .toolbar-btn:focus-visible,
-.modal-btn:focus-visible,
-.mic-btn:focus-visible {
+.modal-btn:focus-visible {
   outline: 2px solid #4A90D9;
   outline-offset: 2px;
 }

@@ -5,7 +5,7 @@ import {
   addChild, updateNodeText, toggleDone, deleteNode, moveNode,
   findNode, getNodeDepth,
 } from './mindmap.js';
-import { createVoiceController, isSpeechSupported } from './voice.js';
+
 import { pushSnapshot, undo, redo, canUndo, canRedo, clearHistory } from './history.js';
 
 let _root = null;
@@ -28,14 +28,11 @@ const btnFit = document.getElementById('btn-fit');
 const btnPdf = document.getElementById('btn-pdf');
 const btnUndo = document.getElementById('btn-undo');
 const btnRedo = document.getElementById('btn-redo');
-const btnMicToolbar = document.getElementById('btn-mic-toolbar');
-
 // Edit modal
 const editModal = document.getElementById('edit-modal');
 const editInput = document.getElementById('edit-input');
 const btnModalCancel = document.getElementById('btn-modal-cancel');
 const btnModalSave = document.getElementById('btn-modal-save');
-const btnMicModal = document.getElementById('btn-mic-modal');
 const emojiTabs = document.getElementById('emoji-tabs');
 const emojiGrid = document.getElementById('emoji-grid');
 
@@ -49,10 +46,6 @@ const btnConfirmOk = document.getElementById('btn-confirm-ok');
 const statusLeft = document.getElementById('status-left');
 const statusRight = document.getElementById('status-right');
 
-// Voice
-let _voiceModal = null;
-let _voiceToolbar = null;
-
 // Pending confirm callback
 let _confirmCallback = null;
 
@@ -65,7 +58,6 @@ export function initUI(root, onChange) {
   _root = root;
   _onChange = onChange;
 
-  setupVoice();
   setupToolbarButtons();
   setupModal();
   setupConfirmDialog();
@@ -301,10 +293,6 @@ function openEditModal(nodeId) {
 function closeEditModal() {
   editModal.classList.remove('active');
   _editingNodeId = null;
-  if (_voiceModal && _voiceModal.isListening()) {
-    _voiceModal.stop();
-    btnMicModal.classList.remove('recording');
-  }
 }
 
 function saveEditModal() {
@@ -715,83 +703,6 @@ function setupKeyboard() {
       case 'Escape':
         deselectAll();
         break;
-    }
-  });
-}
-
-// ---- Voice ----
-
-function setupVoice() {
-  if (!isSpeechSupported()) {
-    btnMicToolbar.classList.add('hidden');
-    btnMicModal.classList.add('hidden');
-    return;
-  }
-
-  // Modal mic button — dictate into text field
-  _voiceModal = createVoiceController({
-    onInterim(text) {
-      editInput.value = text;
-    },
-    onFinal(text) {
-      editInput.value = text;
-      btnMicModal.classList.remove('recording');
-    },
-    onStart() {
-      btnMicModal.classList.add('recording');
-    },
-    onEnd() {
-      btnMicModal.classList.remove('recording');
-    },
-    onError() {
-      btnMicModal.classList.remove('recording');
-    },
-  });
-
-  btnMicModal.addEventListener('click', () => {
-    if (_voiceModal.isListening()) {
-      _voiceModal.stop();
-    } else {
-      _voiceModal.start();
-    }
-  });
-
-  // Toolbar mic button — quick-add child via voice
-  _voiceToolbar = createVoiceController({
-    onFinal(text) {
-      if (!_selectedId) return;
-      pushSnapshot(_root);
-      const child = addChild(_root, _selectedId, text);
-      if (child) {
-        treeChanged();
-        _selectedId = child.id;
-        render();
-      }
-      btnMicToolbar.classList.remove('recording');
-    },
-    onStart() {
-      btnMicToolbar.classList.add('recording');
-      statusLeft.textContent = 'Listening…';
-    },
-    onEnd() {
-      btnMicToolbar.classList.remove('recording');
-      updateStatus();
-    },
-    onError() {
-      btnMicToolbar.classList.remove('recording');
-      updateStatus();
-    },
-  });
-
-  btnMicToolbar.addEventListener('click', () => {
-    if (!_selectedId) {
-      statusLeft.textContent = 'Select a node first, then use Voice';
-      return;
-    }
-    if (_voiceToolbar.isListening()) {
-      _voiceToolbar.stop();
-    } else {
-      _voiceToolbar.start();
     }
   });
 }
