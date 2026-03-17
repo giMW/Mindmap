@@ -33,8 +33,6 @@ const editModal = document.getElementById('edit-modal');
 const editInput = document.getElementById('edit-input');
 const btnModalCancel = document.getElementById('btn-modal-cancel');
 const btnModalSave = document.getElementById('btn-modal-save');
-const emojiTabs = document.getElementById('emoji-tabs');
-const emojiGrid = document.getElementById('emoji-grid');
 
 // Confirm dialog
 const confirmOverlay = document.getElementById('confirm-dialog');
@@ -204,13 +202,6 @@ function setupToolbarButtons() {
 
 let _editingNodeId = null;
 
-const EMOJI_CATEGORIES = {
-  'Smileys':  ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😘','😋','😛','🤔','🤗','🤫','😎','🥳','😤','💪','👍','👏','🙌','🤝','❤️','🔥'],
-  'Nature':   ['🌟','⭐','🌈','☀️','🌙','⚡','💧','🌊','🌸','🌺','🌻','🌹','🍀','🌿','🌴','🌳','🍎','🍊','🍋','🍇','🍉','🍓','🥑','🌽','🐶','🐱','🦋','🐝','🐢','🦄'],
-  'Objects':  ['💡','🎯','🏆','🎨','🎵','🎬','📷','💻','📱','📧','📝','📌','📎','🔑','🔒','🔔','💰','💎','🎁','🎈','🎉','🎊','🏠','🚀','✈️','🚗','⏰','📅','🗂️','📊'],
-  'Symbols':  ['✅','❌','⚠️','💯','✨','💥','💫','🔴','🟠','🟡','🟢','🔵','🟣','⬛','⬜','🔶','🔷','▶️','⏸️','🔄','➕','➖','❓','❗','♻️','🏷️','🔗','📍','🚩','🎗️'],
-};
-
 function setupModal() {
   btnModalCancel.addEventListener('click', closeEditModal);
   btnModalSave.addEventListener('click', saveEditModal);
@@ -229,51 +220,6 @@ function setupModal() {
       closeEditModal();
     }
   });
-
-  setupEmojiPicker();
-}
-
-function setupEmojiPicker() {
-  const categories = Object.keys(EMOJI_CATEGORIES);
-
-  // Build tabs
-  categories.forEach((cat, i) => {
-    const tab = document.createElement('button');
-    tab.type = 'button';
-    tab.className = 'emoji-tab' + (i === 0 ? ' active' : '');
-    tab.textContent = cat;
-    tab.addEventListener('click', () => {
-      emojiTabs.querySelectorAll('.emoji-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      renderEmojiGrid(cat);
-    });
-    emojiTabs.appendChild(tab);
-  });
-
-  // Show first category
-  renderEmojiGrid(categories[0]);
-}
-
-function renderEmojiGrid(category) {
-  emojiGrid.innerHTML = '';
-  for (const emoji of EMOJI_CATEGORIES[category]) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'emoji-btn';
-    btn.textContent = emoji;
-    btn.addEventListener('click', () => {
-      // Insert emoji at cursor position in the textarea
-      const start = editInput.selectionStart;
-      const end = editInput.selectionEnd;
-      const val = editInput.value;
-      editInput.value = val.slice(0, start) + emoji + val.slice(end);
-      // Move cursor after the inserted emoji
-      const newPos = start + emoji.length;
-      editInput.setSelectionRange(newPos, newPos);
-      editInput.focus();
-    });
-    emojiGrid.appendChild(btn);
-  }
 }
 
 function openEditModal(nodeId) {
