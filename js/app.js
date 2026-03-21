@@ -1,9 +1,9 @@
 // Entry point: wires together all modules
 
 import { createDefaultTree } from './mindmap.js';
-import { initUI, setRoot, showLoading, hideLoading } from './ui.js';
+import { initUI, setRoot, getRoot, showLoading, hideLoading } from './ui.js';
 import { initAuth, signIn, signOut } from './auth.js';
-import { loadMindMap, debouncedSave } from './store.js';
+import { loadMindMap, debouncedSave, flushSave } from './store.js';
 import { isFirebaseConfigured, initFirebase } from './firebase-config.js';
 
 let _currentUser = null;
@@ -27,8 +27,9 @@ async function main() {
   await initFirebase();
 
   // Setup auth button
-  btnAuth.addEventListener('click', () => {
+  btnAuth.addEventListener('click', async () => {
     if (_currentUser) {
+      await flushSave(_currentUser.uid, getRoot());
       signOut();
     } else {
       signIn();
@@ -67,14 +68,14 @@ async function main() {
 // ---- Auth UI ----
 
 function updateAuthUI(user) {
+  const label = document.getElementById('auth-label');
+  const name = document.getElementById('user-name');
   if (user) {
-    authLabel.textContent = 'Sign Out';
-    userName.textContent = user.displayName || user.email || '';
-    btnAuth.querySelector('.btn-icon').textContent = '🚪';
+    if (label) label.textContent = 'Sign Out';
+    if (name) name.textContent = user.displayName || user.email || '';
   } else {
-    authLabel.textContent = 'Sign In';
-    userName.textContent = '';
-    btnAuth.querySelector('.btn-icon').textContent = '👤';
+    if (label) label.textContent = 'Sign In';
+    if (name) name.textContent = '';
   }
 }
 
@@ -83,7 +84,6 @@ function updateAuthUI(user) {
 function onTreeChange(root) {
   if (_currentUser) {
     debouncedSave(_currentUser.uid, root);
-    statusRight.textContent = 'Saving…';
   }
 }
 
