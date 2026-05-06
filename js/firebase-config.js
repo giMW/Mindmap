@@ -20,10 +20,11 @@ const firebaseConfig = {
   projectId: "mymindmap-b2dff",
   storageBucket: "mymindmap-b2dff.firebasestorage.app",
   messagingSenderId: "912888131114",
-  appId: "1:912888131114:web:e2b987b9e5c54004a95d53",
+  appId: "1:912888131114:web:b844809126566ec2a95d53"
 };
+  
 
-// Check if Firebase is configured
+// Check if Firebase is configured (i.e. real values have replaced the placeholders)
 export const isFirebaseConfigured =
   firebaseConfig.apiKey !== "YOUR_API_KEY" &&
   firebaseConfig.projectId !== "YOUR_PROJECT_ID";
