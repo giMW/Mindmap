@@ -160,12 +160,21 @@ function updateStatus() {
 function setupToolbarButtons() {
   btnAdd.addEventListener('click', () => {
     if (!_selectedId) return;
+    const parentId = _selectedId;
     pushSnapshot(_root);
     const child = addChild(_root, _selectedId);
     if (child) {
       treeChanged();
       _selectedId = child.id;
       render();
+      // Flash the parent node to confirm the new connection
+      requestAnimationFrame(() => {
+        const pg = svg.querySelector(`.node-group[data-node-id="${parentId}"]`);
+        if (pg) {
+          pg.classList.add('node-just-added-to');
+          setTimeout(() => pg.classList.remove('node-just-added-to'), 700);
+        }
+      });
       openEditModal(child.id);
     }
   });

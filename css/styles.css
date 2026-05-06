@@ -175,6 +175,16 @@ html, body {
   filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
 }
 
+@keyframes parentFlash {
+  0%   { filter: brightness(1.4) drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
+  100% { filter: brightness(1); }
+}
+
+.node-group.node-just-added-to .node-rect,
+.node-group.node-just-added-to .node-circle {
+  animation: parentFlash 0.7s ease-out forwards;
+}
+
 .node-label {
   user-select: none;
   pointer-events: none;

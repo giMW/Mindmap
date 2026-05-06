@@ -113,7 +113,8 @@ function drawEdges(layer, node, positions) {
     if (!childPos) continue;
 
     const pathData = computeEdgePath(parentPos, childPos);
-    const colors = getNodeColors(childPos.depth, childPos.branchIndex, false);
+    const isParent = childPos.node && childPos.node.children.length > 0;
+    const colors = getNodeColors(childPos.depth, childPos.branchIndex, false, isParent);
 
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', pathData);
@@ -182,7 +183,8 @@ function wrapText(text, maxCharsPerLine) {
  */
 function drawNode(layer, pos, isSelected, callbacks) {
   const { x, y, depth, branchIndex, node } = pos;
-  const colors = getNodeColors(depth, branchIndex, node.done);
+  const isParent = depth > 0 && node.children.length > 0;
+  const colors = getNodeColors(depth, branchIndex, node.done, isParent);
   const { plainText, urls, imageUrls } = parseContent(node.text);
 
   const group = document.createElementNS(SVG_NS, 'g');
@@ -225,6 +227,7 @@ function drawNode(layer, pos, isSelected, callbacks) {
     // Date subtitle (Pacific Time)
     const dateStr = new Date().toLocaleDateString('en-US', {
       timeZone: 'America/Los_Angeles',
+      weekday: 'short',
       month: 'short', day: 'numeric', year: 'numeric',
     });
     const dateLbl = document.createElementNS(SVG_NS, 'text');
@@ -246,7 +249,8 @@ function drawNode(layer, pos, isSelected, callbacks) {
     const maxCharsPerLine = depth === 1 ? 16 : 14;
     const fontSize = depth === 1 ? 12 : 11;
 
-    const displayStr = plainText || node.text;
+    // Don't fall back to raw node.text — URLs are already shown via the link indicator
+    const displayStr = plainText;
     const lines = wrapText(displayStr, maxCharsPerLine);
 
     // Calculate dynamic height based on content
@@ -276,6 +280,23 @@ function drawNode(layer, pos, isSelected, callbacks) {
     addNodeListeners(rect, node.id, callbacks);
     group.appendChild(rect);
 
+    // Clip all text/image content to the node bounds so nothing overflows
+    const clipContentId = `clip-content-${node.id}`;
+    const clipDefs = document.createElementNS(SVG_NS, 'defs');
+    const clipPathEl = document.createElementNS(SVG_NS, 'clipPath');
+    clipPathEl.setAttribute('id', clipContentId);
+    const clipR = document.createElementNS(SVG_NS, 'rect');
+    clipR.setAttribute('x', rx + 4);
+    clipR.setAttribute('y', ry + 4);
+    clipR.setAttribute('width', nodeW - 8);
+    clipR.setAttribute('height', nodeH - 8);
+    clipPathEl.appendChild(clipR);
+    clipDefs.appendChild(clipPathEl);
+    group.appendChild(clipDefs);
+
+    const contentGroup = document.createElementNS(SVG_NS, 'g');
+    contentGroup.setAttribute('clip-path', `url(#${clipContentId})`);
+
     // Multi-line text label
     let textY = y - (contentH / 2) + LINE_HEIGHT / 2;
     for (const line of lines) {
@@ -290,7 +311,7 @@ function drawNode(layer, pos, isSelected, callbacks) {
       tspan.setAttribute('pointer-events', 'none');
       tspan.classList.add('node-label');
       tspan.textContent = line;
-      group.appendChild(tspan);
+      contentGroup.appendChild(tspan);
       textY += LINE_HEIGHT;
     }
 
@@ -301,20 +322,20 @@ function drawNode(layer, pos, isSelected, callbacks) {
         const imgX = imgStartX + i * (IMAGE_THUMB_SIZE + 4);
         const imgY = textY + 2;
 
-        // Clip to rounded rect
-        const clipId = `clip-${node.id}-img${i}`;
-        const defs = document.createElementNS(SVG_NS, 'defs');
-        const clipPath = document.createElementNS(SVG_NS, 'clipPath');
-        clipPath.setAttribute('id', clipId);
-        const clipRect = document.createElementNS(SVG_NS, 'rect');
-        clipRect.setAttribute('x', imgX);
-        clipRect.setAttribute('y', imgY);
-        clipRect.setAttribute('width', IMAGE_THUMB_SIZE);
-        clipRect.setAttribute('height', IMAGE_THUMB_SIZE);
-        clipRect.setAttribute('rx', '4');
-        clipPath.appendChild(clipRect);
-        defs.appendChild(clipPath);
-        group.appendChild(defs);
+        // Per-image clip (rounded corners)
+        const imgClipId = `clip-${node.id}-img${i}`;
+        const imgDefs = document.createElementNS(SVG_NS, 'defs');
+        const imgClipPath = document.createElementNS(SVG_NS, 'clipPath');
+        imgClipPath.setAttribute('id', imgClipId);
+        const imgClipRect = document.createElementNS(SVG_NS, 'rect');
+        imgClipRect.setAttribute('x', imgX);
+        imgClipRect.setAttribute('y', imgY);
+        imgClipRect.setAttribute('width', IMAGE_THUMB_SIZE);
+        imgClipRect.setAttribute('height', IMAGE_THUMB_SIZE);
+        imgClipRect.setAttribute('rx', '4');
+        imgClipPath.appendChild(imgClipRect);
+        imgDefs.appendChild(imgClipPath);
+        group.appendChild(imgDefs);  // defs go in group, not contentGroup
 
         const img = document.createElementNS(SVG_NS, 'image');
         img.setAttributeNS(XLINK_NS, 'href', url);
@@ -323,14 +344,14 @@ function drawNode(layer, pos, isSelected, callbacks) {
         img.setAttribute('width', IMAGE_THUMB_SIZE);
         img.setAttribute('height', IMAGE_THUMB_SIZE);
         img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-        img.setAttribute('clip-path', `url(#${clipId})`);
+        img.setAttribute('clip-path', `url(#${imgClipId})`);
         img.setAttribute('pointer-events', 'none');
-        group.appendChild(img);
+        contentGroup.appendChild(img);
       });
       textY += IMAGE_THUMB_SIZE + 6;
     }
 
-    // URL indicator (link icon + truncated URL)
+    // URL indicator (link icon + truncated domain)
     if (hasUrls) {
       const linkY = textY + (hasImages ? 0 : 2);
       const linkText = document.createElementNS(SVG_NS, 'text');
@@ -343,12 +364,15 @@ function drawNode(layer, pos, isSelected, callbacks) {
       linkText.setAttribute('font-weight', 'bold');
       linkText.setAttribute('pointer-events', 'none');
       linkText.classList.add('node-label');
-      const shortUrl = urls[0].replace(/^https?:\/\//, '').slice(0, 20) + (urls[0].length > 27 ? '…' : '');
+      const strippedUrl = urls[0].replace(/^https?:\/\//, '');
+      const shortUrl = strippedUrl.slice(0, 14) + (strippedUrl.length > 14 ? '…' : '');
       linkText.textContent = '🔗 ' + shortUrl;
-      group.appendChild(linkText);
+      contentGroup.appendChild(linkText);
     }
 
-    // Checkbox (top-right corner of rectangle)
+    group.appendChild(contentGroup);
+
+    // Checkbox (top-right corner of rectangle, intentionally outside clip)
     const cbSize = 18;
     const cbX = rx + nodeW - 4;
     const cbY = ry - 4;

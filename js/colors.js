@@ -36,7 +36,7 @@ export function getBranchColor(branchIndex) {
  * @param {boolean} done — whether the node is marked done
  * @returns {{ fill: string, text: string, stroke: string }}
  */
-export function getNodeColors(depth, branchIndex, done) {
+export function getNodeColors(depth, branchIndex, done, isParent = false) {
   let fill, text, stroke;
 
   if (depth === 0) {
@@ -45,11 +45,13 @@ export function getNodeColors(depth, branchIndex, done) {
     stroke = ROOT_COLOR.stroke;
   } else {
     const branch = getBranchColor(branchIndex);
-    if (depth === 1) {
+    if (depth === 1 || isParent) {
+      // Parent nodes at any depth use the bold base color
       fill = branch.base;
       text = '#FFFFFF';
       stroke = branch.dark;
     } else {
+      // Leaf nodes use the soft light color
       fill = branch.light;
       text = branch.dark;
       stroke = branch.base;
