@@ -3,8 +3,9 @@
 import { renderMindMap, getCurrentPositions, redrawEdges, setPositionOverride, clearPositionOverrides } from './renderer.js';
 import {
   addChild, updateNodeText, toggleDone, deleteNode, moveNode,
-  findNode, getNodeDepth,
+  findNode, getNodeDepth, cycleNodeColor,
 } from './mindmap.js';
+import { BRANCH_COLORS } from './colors.js';
 
 import { pushSnapshot, undo, redo, canUndo, canRedo, clearHistory } from './history.js';
 
@@ -90,7 +91,6 @@ export function getRoot() {
 function render() {
   renderMindMap(svg, _root, _selectedId, {
     onNodeClick: selectNode,
-    onNodeDblClick: openEditModal,
     onCheckboxClick: handleCheckboxClick,
   });
 
@@ -114,7 +114,21 @@ function resetTransform() {
 
 // ---- Selection ----
 
+// Track clicks to detect a double-click manually. We can't rely on the
+// native 'dblclick' event because selecting a node triggers a full
+// re-render, replacing the element the first click landed on — so the
+// browser never sees two clicks on the same element.
+let _lastClick = { id: null, time: 0 };
+const DOUBLE_CLICK_MS = 350;
+
 function selectNode(id) {
+  const now = Date.now();
+  if (_lastClick.id === id && now - _lastClick.time < DOUBLE_CLICK_MS) {
+    _lastClick = { id: null, time: 0 };
+    cycleColor(id);
+    return;
+  }
+  _lastClick = { id, time: now };
   _selectedId = (_selectedId === id) ? null : id;
   render();
 }
@@ -122,6 +136,16 @@ function selectNode(id) {
 function deselectAll() {
   _selectedId = null;
   render();
+}
+
+// Double-click cycles a node's color; the change cascades to its
+// children (handled in layout) unless a child has its own override.
+function cycleColor(id) {
+  pushSnapshot(_root);
+  if (cycleNodeColor(_root, id, BRANCH_COLORS.length)) {
+    treeChanged();
+    render();
+  }
 }
 
 // ---- Toolbar State ----

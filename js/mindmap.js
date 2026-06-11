@@ -17,6 +17,7 @@ export function createNode(text = 'New Node', children = []) {
     id: generateId(),
     text,
     done: false,
+    colorIndex: null,
     children: children.map(c => ({ ...c })),
   };
 }
@@ -46,6 +47,7 @@ export function cloneTree(node) {
     id: node.id,
     text: node.text,
     done: node.done,
+    colorIndex: node.colorIndex ?? null,
     children: node.children.map(c => cloneTree(c)),
   };
 }
@@ -152,6 +154,7 @@ export function serializeTree(node) {
     id: node.id,
     text: node.text,
     done: node.done,
+    colorIndex: node.colorIndex ?? null,
     children: node.children.map(c => serializeTree(c)),
   };
 }
@@ -165,6 +168,7 @@ export function deserializeTree(data) {
     id: data.id || generateId(),
     text: data.text || '',
     done: !!data.done,
+    colorIndex: (typeof data.colorIndex === 'number') ? data.colorIndex : null,
     children: (data.children || []).map(c => deserializeTree(c)),
   };
 }
@@ -179,6 +183,23 @@ export function getNodeDepth(root, nodeId, depth = 0) {
     if (d !== -1) return d;
   }
   return -1;
+}
+
+/**
+ * Cycle a node's color override to the next palette color.
+ * The new color propagates to descendants (via layout) unless a
+ * descendant has its own override. Starts from the node's current
+ * effective color so the first double-click visibly changes it.
+ * @param {number} paletteSize — number of colors in the palette
+ */
+export function cycleNodeColor(root, nodeId, paletteSize) {
+  const result = findNode(root, nodeId);
+  if (!result) return false;
+  const current = result.node.colorIndex != null
+    ? result.node.colorIndex
+    : getBranchIndex(root, nodeId);
+  result.node.colorIndex = (current + 1) % paletteSize;
+  return true;
 }
 
 /**

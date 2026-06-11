@@ -77,11 +77,17 @@ function layoutSubtree(node, centerX, centerY, depth, angle, startAngle, endAngl
   const x = centerX + depth * radiusStep * Math.cos(angle);
   const y = centerY + depth * radiusStep * Math.sin(angle);
 
+  // A node's color override replaces the inherited branch color for itself
+  // and (by passing it down) all descendants without their own override.
+  const effectiveBranch = (depth > 0 && node.colorIndex != null)
+    ? node.colorIndex
+    : branchIndex;
+
   positions.set(node.id, {
     x,
     y,
     depth,
-    branchIndex,
+    branchIndex: effectiveBranch,
     node,
   });
 
@@ -106,7 +112,7 @@ function layoutSubtree(node, centerX, centerY, depth, angle, startAngle, endAngl
       midAngle,
       childAngle,
       childAngle + sweep,
-      branchIndex,
+      effectiveBranch,
       radiusStep,
       positions
     );
